@@ -5,8 +5,12 @@ import matplotlib.pyplot as plt
 
 import seaborn as sb
 
-import io, os
-import base64
+import os
+
+from functions.plot_solar_electricity import plot_solar_electricity
+from functions.plot_energy_consumption_pie import plot_energy_consumption_pie
+from functions.plot_renewable_vs_non import plot_renewable_vs_non
+from functions.plot_energy_consumption_trend import plot_energy_consumption_trend
 
 # import flask to create a server and send api
 from flask import Flask, request, jsonify
@@ -33,6 +37,14 @@ else:
 dataset = pd.read_csv(file_path)
 print(dataset.head())
 
+# Inspect the data
+print('Dataset info>>>>')
+print(dataset.info())
+print('<<<<<')
+
+
+# Drop unnecessary columns:
+dataset.drop(columns=['iso_code'], inplace=True)
 
 # Check for missing values and replace them with zeros
 missing_values = dataset.isnull().sum()
@@ -62,44 +74,12 @@ if num_duplicates > 0:
 # Save Cleaned Data: Save the cleaned dataset.
 # dataset.to_csv('cleaned_dataset.csv', index=False)
 
+renewable_sources = ['wind_consumption', 'solar_consumption', 'hydro_consumption', 'biofuel_consumption']
+non_renewable_sources = ['coal_consumption', 'oil_consumption', 'gas_consumption', 'nuclear_consumption', 'fossil_fuel_consumption']
+
 # Initialize the Flask app
 app = Flask(__name__)
 
-# Function to plot the relationship between year and solar electricity for a specific country
-def plot_solar_electricity(country_name, start_year=None, end_year=None):
-    # Filter the data for the specific country
-    country_data = dataset[dataset['country'] == country_name]
-
-    # Check if start_year and end_year are in the dataset for the specified country
-    if start_year is not None and start_year not in country_data['year'].values:
-        return jsonify({"error": f"Start year {start_year} is not available in the dataset for {country_name}."}), 400
-    if end_year is not None and end_year not in country_data['year'].values:
-        return jsonify({"error": f"End year {end_year} is not available in the dataset for {country_name}."}), 400
-
-    # Apply year range filter if start_year and end_year are provided
-    if start_year is not None:
-        country_data = country_data[country_data['year'] >= start_year]
-    if end_year is not None:
-        country_data = country_data[country_data['year'] <= end_year]
-
-    # Plot the data
-    plt.figure(figsize=(10, 6))
-    plt.plot(country_data['year'], country_data['solar_electricity'], marker='o')
-    plt.xlabel('Year')
-    plt.ylabel('Solar Electricity Generation (TWh)')
-    title = f'Solar Electricity Generation for {country_name}'
-    if start_year is not None and end_year is not None:
-        title = f'Solar Electricity Generation ({start_year}-{end_year}) for {country_name}'
-    plt.title(title)
-    plt.grid(True)
-    
-    # Save the plot to a bytes object and encode it as a base64 string
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plot_url = base64.b64encode(img.getvalue()).decode()
-
-    return f"<img src='data:image/png;base64,{plot_url}'/>"
 
 # Define the API endpoint
 @app.route('/plot_solar_electricity', methods=['GET'])
@@ -111,7 +91,40 @@ def plot_solar_electricity_api():
     if not country:
         return jsonify({"error": "Country parameter is required"}), 400
 
-    plot_html = plot_solar_electricity(country, start_year, end_year)
+    plot_html = plot_solar_electricity(dataset, country, start_year, end_year)
+    return plot_html
+
+@app.route('/plot_energy_consumption_pie', methods=['GET'])
+def plot_energy_consumption_pie_api():
+    country = request.args.get('country')
+    year = request.args.get('year', type=int)
+
+    if not country:
+        return jsonify({"error": "Country parameter is required"}), 400
+    if not year:
+        return jsonify({"error": "Year parameter is required"}), 400
+    
+    energy_sources = renewable_sources + non_renewable_sources
+
+    plot_html = plot_energy_consumption_pie(dataset, energy_sources, country, year)
+    return plot_html
+
+@app.route('/plot_renewable_vs_non', methods=['GET'])
+def plot_renewable_vs_non_api():
+    country = request.args.get('country')
+    start_year = request.args.get('start_year', type=int)
+    end_year = request.args.get('end_year', type=int)
+
+    plot_html = plot_renewable_vs_non(dataset, country, start_year, end_year)
+    return plot_html
+
+@app.route('/plot_energy_consumption_trend', methods=['GET'])
+def plot_energy_consumption_trend_api():
+    country = request.args.get('country')
+    start_year = request.args.get('start_year', type=int)
+    end_year = request.args.get('end_year', type=int)
+    
+    plot_html = plot_energy_consumption_trend(dataset, country, start_year, end_year)
     return plot_html
 
 # Run the Flask app
