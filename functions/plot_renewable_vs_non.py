@@ -30,5 +30,11 @@ def plot_renewable_vs_non(dataset, country_name, start_year=None, end_year=None)
     
     # Save the plot to a bytes object and encode it as a base64 string
     plot_url = save_plot(plt)
+    
+    energy_comparison_data = {
+        'year': country_data['year'].tolist(),
+        'renewable_energy': country_data['renewable_energy'].tolist(),
+        'non_renewable_energy': country_data['non_renewable_energy'].tolist()
+    }
     # Return the plot as an HTML <img> tag
-    return f"<img src='data:image/png;base64,{plot_url}'/>"
+    return {"data": energy_comparison_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}

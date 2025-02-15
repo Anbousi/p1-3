@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import io
-import base64
 
 from functions.filter_energy_data import filter_energy_data
 from functions.save_plot import save_plot
@@ -28,5 +26,15 @@ def plot_energy_consumption_trend(dataset, country_name, start_year=None, end_ye
     plt.title(f'Energy Consumption Trends in {country_name}')
     
     plot_url = save_plot(plt)
+    
+    plot_data = {}
+
+    # Collect data for each column
+    for column in consumption_columns:
+        plot_data[column] = {
+            'year': country_data['year'].tolist(),
+            'consumption': country_data[column].tolist()
+        }
+        
     # Return the plot as an HTML <img> tag
-    return f"<img src='data:image/png;base64,{plot_url}'/>"
+    return {"data": plot_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}

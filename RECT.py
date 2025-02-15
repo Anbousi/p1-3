@@ -11,9 +11,10 @@ from functions.plot_solar_electricity import plot_solar_electricity
 from functions.plot_energy_consumption_pie import plot_energy_consumption_pie
 from functions.plot_renewable_vs_non import plot_renewable_vs_non
 from functions.plot_energy_consumption_trend import plot_energy_consumption_trend
+from cols_to_check import cols_to_check
 
 # import flask to create a server and send api
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 
 # Define the file path and URL
 # Data source
@@ -41,6 +42,8 @@ print(dataset.head())
 print('Dataset info>>>>')
 print(dataset.info())
 print('<<<<<')
+total_rows = dataset.shape[0]  # Number of rows
+print(f"Total rows in dataset: {total_rows}")
 
 
 # Drop unnecessary columns:
@@ -70,15 +73,48 @@ print(f"Number of duplicate rows: {num_duplicates}")
 if num_duplicates > 0:
     print(dataset[duplicate_rows])
     dataset = dataset.drop_duplicates()
-    
+
+# Keep only the columns that actually exist in the DataFrame
+existing_cols = [col for col in cols_to_check if col in dataset.columns]
+
+# Drop rows where all these columns are 0
+if existing_cols:
+    dataset = dataset[dataset[existing_cols].ne(0).any(axis=1)]
+total_rows = dataset.shape[0]  # Number of rows
+print(f"Total rows in dataset: {total_rows}")
 # Save Cleaned Data: Save the cleaned dataset.
-# dataset.to_csv('cleaned_dataset.csv', index=False)
+dataset.to_csv('cleaned_dataset.csv', index=False)
 
 renewable_sources = ['wind_consumption', 'solar_consumption', 'hydro_consumption', 'biofuel_consumption']
 non_renewable_sources = ['coal_consumption', 'oil_consumption', 'gas_consumption', 'nuclear_consumption', 'fossil_fuel_consumption']
 
 # Initialize the Flask app
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    available_links = [
+        "/plot_solar_electricity?country=Germany&start_year=2000&end_year=2023",
+        "/plot_energy_consumption_pie?country=Germany&year=2000",
+        "/plot_renewable_vs_non?country=Germany&start_year=2000&end_year=2023",
+        "/plot_energy_consumption_trend?country=Germany&start_year=2000&end_year=2023",
+        
+    ]
+    
+    # add list of <a> tags to available routes
+    #just for checking results when running server
+    #TODO: delete this after creating the ui
+    links_html = "".join([f'<a href="{link}">{link}</a><br>' for link in available_links])
+    
+    return render_template_string(f'''
+    <html>
+        <head><title>Available Links</title></head>
+        <body>
+            <h1>Available Links</h1>
+            {links_html}
+        </body>
+    </html>
+    ''')
 
 
 # Define the API endpoint

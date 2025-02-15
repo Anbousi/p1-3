@@ -25,5 +25,11 @@ def plot_energy_consumption_pie(data, energy_sources, country_name, year):
     plt.grid(True)
     
     plot_url = save_plot(plt)
+    
+    consumption_data = {
+        'energy_sources': energy_sources,
+        'consumption': energy_consumption.tolist()
+    }
+    
     # Return the plot as an HTML <img> tag
-    return f"<img src='data:image/png;base64,{plot_url}'/>"
+    return {"data": consumption_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}

@@ -24,5 +24,10 @@ def plot_solar_electricity(dataset, country_name, start_year=None, end_year=None
     
     # Save the plot to a bytes object and encode it as a base64 string
     plot_url = save_plot(plt)
+    
+    solar_electricity_data = {
+        'year': country_data['year'].tolist(),
+        'solar_electricity': country_data['solar_electricity'].tolist()
+    }
     # Return the plot as an HTML <img> tag
-    return f"<img src='data:image/png;base64,{plot_url}'/>"
+    return {"data": solar_electricity_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}
