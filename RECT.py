@@ -1,9 +1,5 @@
 # import necessary libraries
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-import seaborn as sb
 
 import os
 
@@ -11,10 +7,14 @@ from functions.plot_solar_electricity import plot_solar_electricity
 from functions.plot_energy_consumption_pie import plot_energy_consumption_pie
 from functions.plot_renewable_vs_non import plot_renewable_vs_non
 from functions.plot_energy_consumption_trend import plot_energy_consumption_trend
-from cols_to_check import cols_to_check
+from functions.predict_consumption import predict_consumption
+from cols_to_check import features
+
 
 # import flask to create a server and send api
 from flask import Flask, request, jsonify, render_template_string
+
+from flask_cors import CORS  # Import CORS
 
 # Define the file path and URL
 # Data source
@@ -38,13 +38,12 @@ else:
 dataset = pd.read_csv(file_path)
 print(dataset.head())
 
-# Inspect the data
-print('Dataset info>>>>')
-print(dataset.info())
-print('<<<<<')
+# # Inspect the data
+# print('Dataset info>>>>')
+# print(dataset.info())
+# print('<<<<<')
 total_rows = dataset.shape[0]  # Number of rows
 print(f"Total rows in dataset: {total_rows}")
-
 
 # Drop unnecessary columns:
 dataset.drop(columns=['iso_code'], inplace=True)
@@ -75,7 +74,7 @@ if num_duplicates > 0:
     dataset = dataset.drop_duplicates()
 
 # Keep only the columns that actually exist in the DataFrame
-existing_cols = [col for col in cols_to_check if col in dataset.columns]
+existing_cols = [col for col in features if col in dataset.columns]
 
 # Drop rows where all these columns are 0
 if existing_cols:
@@ -90,6 +89,7 @@ non_renewable_sources = ['coal_consumption', 'oil_consumption', 'gas_consumption
 
 # Initialize the Flask app
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def home():
@@ -98,7 +98,9 @@ def home():
         "/plot_energy_consumption_pie?country=Germany&year=2000",
         "/plot_renewable_vs_non?country=Germany&start_year=2000&end_year=2023",
         "/plot_energy_consumption_trend?country=Germany&start_year=2000&end_year=2023",
-        
+        '/predict_all_consumptions_for_ten_years_api?country=Germany&start_year=2000',
+        '/predict_consumption?country=Germany&year=2025&energy=wind',
+        '/predict_all_consumptions?country=Germany&year=2025'
     ]
     
     # add list of <a> tags to available routes
@@ -162,6 +164,79 @@ def plot_energy_consumption_trend_api():
     
     plot_html = plot_energy_consumption_trend(dataset, country, start_year, end_year)
     return plot_html
+
+
+@app.route('/predict_consumption', methods=['GET'])
+def predict_consumption_api():
+    country = request.args.get('country')
+    year = request.args.get('year', type=int)
+    energy_type = request.args.get('energy')
+    
+    # data_path='owid-energy-data.csv'
+
+    if not country:
+        return jsonify({"error": "Country parameter is required"}), 400
+    if not year:
+        return jsonify({"error": "Year parameter is required"}), 400
+    if not energy_type:
+        return jsonify({"error": "Energy type parameter is required"}), 400
+    
+    # return predict_consumption(country, year, energy_type, data_path)
+    prediction_consumption = predict_consumption(country_name = country, prediction_year = year, energy_type = energy_type, csv_file_path = file_path)
+    print(prediction_consumption)
+    return jsonify(prediction_consumption)
+
+# List of energy types to predict
+energy_types = [ 'wind', 'solar', 'biofuel', 'hydro', 'renewables', 'gas', 'coal', 'fossil_fuel']
+
+@app.route('/predict_all_consumptions', methods=['GET'])
+def predict_all_consumptions_api():
+    country = request.args.get('country')
+    year = request.args.get('year', type=int)
+    data_path = 'owid-energy-data.csv'
+
+    if not country:
+        return jsonify({"error": "Country parameter is required"}), 400
+    if not year:
+        return jsonify({"error": "Year parameter is required"}), 400
+
+    # To store predictions for all energy types
+    predictions = {}
+
+    # Loop through each energy type and get predictions
+    for energy_type in energy_types:
+        prediction = predict_consumption(country_name = country, prediction_year = year, energy_type = energy_type, csv_file_path = file_path)
+        predictions[energy_type] = prediction
+
+    # Return the predictions as a JSON response
+    return jsonify(predictions)
+
+
+@app.route('/predict_all_consumptions_for_ten_years_api', methods=['GET'])
+def predict_all_consumptions_for_ten_years_api():
+    country = request.args.get('country')
+    start_year = request.args.get('start_year', type=int)
+    data_path = 'owid-energy-data.csv'
+
+    if not country:
+        return jsonify({"error": "Country parameter is required"}), 400
+    if not start_year:
+        return jsonify({"error": "Start year parameter is required"}), 400
+
+    # To store predictions for all energy types and years
+    all_predictions = {}
+
+    # Predict for the next 10 years
+    for year in range(start_year, start_year + 10):
+        yearly_predictions = {}
+        for energy_type in energy_types:
+            prediction = predict_consumption(country, year, energy_type, data_path)
+            yearly_predictions[energy_type] = prediction
+        
+        all_predictions[year] = yearly_predictions
+
+    # Return the predictions as a JSON response
+    return jsonify(all_predictions)
 
 # Run the Flask app
 if __name__ == '__main__':

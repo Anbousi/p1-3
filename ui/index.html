@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Data Viewer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Energy Data Viewer</h1>
+
+        <!-- Dynamic Plot Selection Form -->
+        <form id="plotForm">
+            <h2>Select Plot Type</h2>
+            <label for="plotType">Plot Type:</label>
+            <select id="plotType" name="plot_type">
+                <option value="solar_electricity">Plot Solar Electricity</option>
+                <option value="energy_consumption_pie">Plot Energy Consumption Pie</option>
+                <option value="renewable_vs_non">Plot Renewable vs Non-Renewable</option>
+                <option value="energy_consumption_trend">Plot Energy Consumption Trend</option>
+            </select>
+
+            <div id="dynamicFields"></div>
+
+            <button type="submit">Generate Plot</button>
+        </form>
+
+        <!-- Results Section -->
+        <div id="results"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

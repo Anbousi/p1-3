@@ -36,3 +36,7 @@ end_year is 2023
 this will return a plot for solar solar generation over the years
 
 if the start_year or the end_year are invalid, it will return an error as json object
+
+
+- Functions returns an object with "data" and "img" keys
+{"data": example, "img": f"<img src='image source'/>"}

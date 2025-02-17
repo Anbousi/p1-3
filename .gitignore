@@ -1,3 +1,5 @@
 # Ignore the OWID energy data CSV file
 owid-energy-data.csv
 cleaned_dataset.csv
+
+saved_models/
