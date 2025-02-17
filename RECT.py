@@ -9,6 +9,7 @@ from functions.plot_renewable_vs_non import plot_renewable_vs_non
 from functions.plot_energy_consumption_trend import plot_energy_consumption_trend
 from functions.predict_consumption import predict_consumption
 from cols_to_check import features
+from functions.plot_energy_consumption_over_time import plot_energy_consumption_over_time
 
 
 # import flask to create a server and send api
@@ -98,7 +99,7 @@ def home():
         "/plot_energy_consumption_pie?country=Germany&year=2000",
         "/plot_renewable_vs_non?country=Germany&start_year=2000&end_year=2023",
         "/plot_energy_consumption_trend?country=Germany&start_year=2000&end_year=2023",
-        '/predict_all_consumptions_for_ten_years_api?country=Germany&start_year=2000',
+        '/predict_all_consumptions_for_ten_years?country=Germany',
         '/predict_consumption?country=Germany&year=2025&energy=wind',
         '/predict_all_consumptions?country=Germany&year=2025'
     ]
@@ -166,6 +167,16 @@ def plot_energy_consumption_trend_api():
     return plot_html
 
 
+@app.route('/energy_consumption_over_time', methods=['GET'])
+def plot_energy_consumption_over_time_api():
+    country = request.args.get('country')
+    start_year = request.args.get('start_year', type=int)
+    end_year = request.args.get('end_year', type=int)
+    energy_types = request.args.getlist('energy_types') or None
+    plot_html = plot_energy_consumption_over_time(dataset, country, start_year=start_year, end_year=end_year, energy_types = energy_types)
+    return plot_html
+
+
 @app.route('/predict_consumption', methods=['GET'])
 def predict_consumption_api():
     country = request.args.get('country')
@@ -212,10 +223,10 @@ def predict_all_consumptions_api():
     return jsonify(predictions)
 
 
-@app.route('/predict_all_consumptions_for_ten_years_api', methods=['GET'])
+@app.route('/predict_all_consumptions_for_ten_years', methods=['GET'])
 def predict_all_consumptions_for_ten_years_api():
     country = request.args.get('country')
-    start_year = request.args.get('start_year', type=int)
+    start_year = 2024
     data_path = 'owid-energy-data.csv'
 
     if not country:
@@ -237,6 +248,7 @@ def predict_all_consumptions_for_ten_years_api():
 
     # Return the predictions as a JSON response
     return jsonify(all_predictions)
+
 
 # Run the Flask app
 if __name__ == '__main__':
