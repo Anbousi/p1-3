@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from functions.save_plot import save_plot
 
 # Plots a pie chart for energy consumption by source for a specific country and year.
-def plot_energy_consumption_pie(data, energy_sources, country_name, year):
+def plot_energy_consumption_pie(data, energy_sources, country_name, year, pie_title = 'Energy Consumption'):
 
     # Filter the dataset for the given country and year
     country_year_data = data[(data['country'] == country_name) & (data['year'] == year)]
@@ -21,7 +21,7 @@ def plot_energy_consumption_pie(data, energy_sources, country_name, year):
     # Create the legend (key map) outside the pie chart
     plt.legend(wedges, energy_sources, title="Energy Sources", loc="center left", bbox_to_anchor=(1, 0.5))
 
-    plt.title(f'Energy Consumption by Source in {country_name} ({year})')
+    plt.title(f'{pie_title}Energy Consumption by Source in {country_name} ({year})')
     plt.grid(True)
     
     plot_url = save_plot(plt)

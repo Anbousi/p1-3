@@ -3,13 +3,22 @@ import pandas as pd
 
 import os
 
-from functions.plot_solar_electricity import plot_solar_electricity
+from functions.plot_energy_type import plot_energy_type
 from functions.plot_energy_consumption_pie import plot_energy_consumption_pie
 from functions.plot_renewable_vs_non import plot_renewable_vs_non
 from functions.plot_energy_consumption_trend import plot_energy_consumption_trend
 from functions.predict_consumption import predict_consumption
 from cols_to_check import features
 from functions.plot_energy_consumption_over_time import plot_energy_consumption_over_time
+from functions.plot_renewable_energy_sources_over_time import plot_renewable_energy_sources_over_time
+from functions.get_energy import (
+    get_energy_consumption, 
+    get_energy_consumption_by_type_and_year_for_country, 
+    get_energy_consumption_by_year, 
+    get_renewable_energy_shares_by_year, 
+    get_top_fossil_countries_by_year,
+    get_top_renewable_countries_by_year
+)
 
 
 # import flask to create a server and send api
@@ -37,14 +46,14 @@ else:
 
 # Load the dataset
 dataset = pd.read_csv(file_path)
-print(dataset.head())
+# print(dataset.head())
 
 # # Inspect the data
 # print('Dataset info>>>>')
 # print(dataset.info())
 # print('<<<<<')
 total_rows = dataset.shape[0]  # Number of rows
-print(f"Total rows in dataset: {total_rows}")
+# print(f"Total rows in dataset: {total_rows}")
 
 # Drop unnecessary columns:
 dataset.drop(columns=['iso_code'], inplace=True)
@@ -81,7 +90,7 @@ existing_cols = [col for col in features if col in dataset.columns]
 if existing_cols:
     dataset = dataset[dataset[existing_cols].ne(0).any(axis=1)]
 total_rows = dataset.shape[0]  # Number of rows
-print(f"Total rows in dataset: {total_rows}")
+# print(f"Total rows in dataset: {total_rows}")
 # Save Cleaned Data: Save the cleaned dataset.
 dataset.to_csv('cleaned_dataset.csv', index=False)
 
@@ -95,10 +104,12 @@ CORS(app)
 @app.route('/')
 def home():
     available_links = [
-        "/plot_solar_electricity?country=Germany&start_year=2000&end_year=2023",
-        "/plot_energy_consumption_pie?country=Germany&year=2000",
+        "/plot_energy_type?country=Germany&energy_type=solar_electricity&start_year=2000&end_year=2023",
+        "/plot_energy_consumption_pie?country=Germany&energy_type=renewable&year=2000",
         "/plot_renewable_vs_non?country=Germany&start_year=2000&end_year=2023",
         "/plot_energy_consumption_trend?country=Germany&start_year=2000&end_year=2023",
+        "/plot_energy_consumption_over_time",
+        "/plot_renewable_energy_sources_over_time",
         '/predict_all_consumptions_for_ten_years?country=Germany',
         '/predict_consumption?country=Germany&year=2025&energy=wind',
         '/predict_all_consumptions?country=Germany&year=2025'
@@ -121,31 +132,43 @@ def home():
 
 
 # Define the API endpoint
-@app.route('/plot_solar_electricity', methods=['GET'])
-def plot_solar_electricity_api():
+@app.route('/plot_energy_type', methods=['GET'])
+def plot_energy_type_api():
     country = request.args.get('country')
+    energy_type = request.args.get('energy_type')
     start_year = request.args.get('start_year', type=int)
     end_year = request.args.get('end_year', type=int)
 
     if not country:
         return jsonify({"error": "Country parameter is required"}), 400
-
-    plot_html = plot_solar_electricity(dataset, country, start_year, end_year)
+    
+    plot_html = plot_energy_type(dataset, country, energy_type, start_year, end_year)
+    #to return the image only => plot_html['img']
     return plot_html
 
 @app.route('/plot_energy_consumption_pie', methods=['GET'])
 def plot_energy_consumption_pie_api():
     country = request.args.get('country')
     year = request.args.get('year', type=int)
+    energy_type = request.args.get('energy_type')
 
     if not country:
         return jsonify({"error": "Country parameter is required"}), 400
     if not year:
         return jsonify({"error": "Year parameter is required"}), 400
     
-    energy_sources = renewable_sources + non_renewable_sources
-
-    plot_html = plot_energy_consumption_pie(dataset, energy_sources, country, year)
+    if energy_type == "renewable":
+        energy_sources = renewable_sources
+        pie_title = 'Renewable '
+    elif energy_type == "non_renewable":
+        energy_sources = non_renewable_sources
+        pie_title = 'Non-Renewable '
+    else:
+        energy_sources = renewable_sources + non_renewable_sources
+        pie_title = ''
+    
+    plot_html = plot_energy_consumption_pie(dataset, energy_sources, country, year, pie_title)
+    #to return the image only => plot_html['img']
     return plot_html
 
 @app.route('/plot_renewable_vs_non', methods=['GET'])
@@ -155,6 +178,7 @@ def plot_renewable_vs_non_api():
     end_year = request.args.get('end_year', type=int)
 
     plot_html = plot_renewable_vs_non(dataset, country, start_year, end_year)
+    #to return the image only => plot_html['img']
     return plot_html
 
 @app.route('/plot_energy_consumption_trend', methods=['GET'])
@@ -164,17 +188,27 @@ def plot_energy_consumption_trend_api():
     end_year = request.args.get('end_year', type=int)
     
     plot_html = plot_energy_consumption_trend(dataset, country, start_year, end_year)
-    return plot_html
+    #to return the image only => plot_html['img']
+    return plot_html['img']
 
 
-@app.route('/energy_consumption_over_time', methods=['GET'])
+@app.route('/plot_energy_consumption_over_time', methods=['GET'])
 def plot_energy_consumption_over_time_api():
     country = request.args.get('country')
     start_year = request.args.get('start_year', type=int)
     end_year = request.args.get('end_year', type=int)
-    energy_types = request.args.getlist('energy_types') or None
+    energy_types = request.args.getlist('energy_types') or None   
     plot_html = plot_energy_consumption_over_time(dataset, country, start_year=start_year, end_year=end_year, energy_types = energy_types)
-    return plot_html
+    #to return the image only => plot_html['img']
+    return plot_html['img']
+
+
+@app.route('/plot_renewable_energy_sources_over_time', methods=['GET'])
+def plot_renewable_energy_sources_over_time_api():
+    start_year = request.args.get('start_year', type=int)
+    plot_html = plot_renewable_energy_sources_over_time(dataset, start_year=start_year)
+    #to return the image only => plot_html['img']
+    return plot_html['img']
 
 
 @app.route('/predict_consumption', methods=['GET'])
@@ -194,7 +228,7 @@ def predict_consumption_api():
     
     # return predict_consumption(country, year, energy_type, data_path)
     prediction_consumption = predict_consumption(country_name = country, prediction_year = year, energy_type = energy_type, csv_file_path = file_path)
-    print(prediction_consumption)
+    # print(prediction_consumption)
     return jsonify(prediction_consumption)
 
 # List of energy types to predict
@@ -249,6 +283,43 @@ def predict_all_consumptions_for_ten_years_api():
     # Return the predictions as a JSON response
     return jsonify(all_predictions)
 
+@app.route('/get_energy_consumption', methods=['GET'])
+def api_get_energy_consumption():
+    year = request.args.get('year')
+    result = get_energy_consumption(dataset, int(year))
+    return jsonify(result)
+
+@app.route('/get_energy_consumption_by_year', methods=['GET'])
+def api_get_energy_consumption_by_year():
+    year = request.args.get('year')
+    result = get_energy_consumption_by_year(dataset, int(year))
+    return jsonify(result)
+
+@app.route('/get_top_renewable_countries_by_year', methods=['GET'])
+def api_get_top_renewable_countries_by_year():
+    year = request.args.get('year')
+    result = get_top_renewable_countries_by_year(dataset, int(year))
+    return jsonify(result)
+
+@app.route('/get_renewable_energy_shares_by_year', methods=['GET'])
+def api_get_renewable_energy_shares_by_year():
+    year = request.args.get('year')
+    result = get_renewable_energy_shares_by_year(dataset, int(year))
+    return jsonify(result)
+
+@app.route('/get_top_fossil_countries_by_year', methods=['GET'])
+def api_get_top_fossil_countries_by_year():
+    year = request.args.get('year')
+    result = get_top_fossil_countries_by_year(dataset, int(year))
+    return jsonify(result)
+
+@app.route('/get_energy_consumption_by_type_and_year_for_country', methods=['GET'])
+def api_get_energy_consumption_by_type_and_year_for_country():
+    country = request.args.get('country')
+    year = request.args.get('year')
+    energy_type = request.args.get('energy_type')
+    result = get_energy_consumption_by_type_and_year_for_country(dataset, int(year), energy_type, country)
+    return jsonify(result)
 
 # Run the Flask app
 if __name__ == '__main__':
