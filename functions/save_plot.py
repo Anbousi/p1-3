@@ -1,5 +1,7 @@
 import io
 import base64
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def save_plot(plt):

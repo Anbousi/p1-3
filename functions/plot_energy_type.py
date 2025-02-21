@@ -1,5 +1,7 @@
 import io, os
 import base64
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from functions.save_plot import save_plot
@@ -27,7 +29,8 @@ def plot_energy_type(dataset, country_name, energy_type = 'solar_electricity',st
     
     energy_type_data = {
         'year': country_data['year'].tolist(),
-        'energy_type': country_data[energy_type].tolist()
+        'consumption': country_data[energy_type].tolist()
     }
     # Return the plot as an HTML <img> tag
+    print(energy_type_data)
     return {"data": energy_type_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}

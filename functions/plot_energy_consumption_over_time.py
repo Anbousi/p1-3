@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from functions.save_plot import save_plot
@@ -41,7 +43,7 @@ def plot_energy_consumption_over_time(data, country=None, start_year=None, end_y
    
     energy_consumption_over_time_data = {
     'year': data['year'].tolist(),
-    'energy_consumption': data[energy_type].tolist()
+    'consumption': data[energy_type].tolist()
     }
     # Return the plot as an HTML <img> tag
     return {"data": energy_consumption_over_time_data, "img": f"<img src='data:image/png;base64,{plot_url}'/>"}

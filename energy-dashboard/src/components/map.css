@@ -1,0 +1,222 @@
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #F5F5F5;
+  margin: 0;
+  padding: 0;
+  color: #333333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: #F5F5F5;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #4CAF50;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: #FFC107;
+  margin-top: 0.5rem;
+}
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  background-color: #F5F5F5;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nav-item {
+  font-weight: 600;
+  transition: transform 0.2s;
+  color: #333333;
+}
+
+.nav-item:hover {
+  transform: scale(1.1);
+  color: #2196F3;
+}
+
+/* Graph Grid Styles */
+.graph-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.graph-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f8f8f8;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.graph-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.graph-image-container {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.graph-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.graph-caption {
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #333333;
+}
+
+/* Map Container Styles */
+.map-container {
+  width: 100%;
+  margin-bottom: 2rem;
+  border: 1px solid #2196F3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Content Section Styles */
+.content-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin: 2rem 0 3rem 0;
+}
+
+.content-box {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.content-title {
+  color: #4CAF50;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #FFC107;
+  padding-bottom: 0.5rem;
+}
+
+.content-text {
+  color: #333333;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* Contact Section Styles */
+.contact-section {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.contact-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2196F3;
+  margin-bottom: 0.5rem;
+}
+
+.contact-info {
+  color: #333333;
+  font-size: 0.875rem;
+}
+
+/* Animations for Graphs */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animated-card {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .graph-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .content-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .navbar {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+}
+/* Marker Animation */
+.marker-animation {
+  animation: markerRise 0.5s ease-out;
+}
+
+@keyframes markerRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Graph Card Animation */
+.graph-card {
+  opacity: 0; /* Initially hidden */
+}
+
+/* Other styles remain the same */

@@ -6,6 +6,10 @@
   height: 40vmin;
   pointer-events: none;
 }
+.leaflet-container {
+  height: 500px;
+  width: 100%;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {

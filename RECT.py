@@ -189,7 +189,7 @@ def plot_energy_consumption_trend_api():
     
     plot_html = plot_energy_consumption_trend(dataset, country, start_year, end_year)
     #to return the image only => plot_html['img']
-    return plot_html['img']
+    return plot_html
 
 
 @app.route('/plot_energy_consumption_over_time', methods=['GET'])
@@ -200,7 +200,7 @@ def plot_energy_consumption_over_time_api():
     energy_types = request.args.getlist('energy_types') or None   
     plot_html = plot_energy_consumption_over_time(dataset, country, start_year=start_year, end_year=end_year, energy_types = energy_types)
     #to return the image only => plot_html['img']
-    return plot_html['img']
+    return plot_html
 
 
 @app.route('/plot_renewable_energy_sources_over_time', methods=['GET'])
@@ -208,7 +208,7 @@ def plot_renewable_energy_sources_over_time_api():
     start_year = request.args.get('start_year', type=int)
     plot_html = plot_renewable_energy_sources_over_time(dataset, start_year=start_year)
     #to return the image only => plot_html['img']
-    return plot_html['img']
+    return plot_html
 
 
 @app.route('/predict_consumption', methods=['GET'])
