@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import {
   LineChart,
   Line,
@@ -28,6 +30,7 @@ import { motion } from "framer-motion";
 
 const EnergyPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [energyType, setEnergyType] = useState("");
   const [chartData, setChartData] = useState([]);
   const [prediction, setPrediction] = useState(null);
@@ -35,6 +38,35 @@ const EnergyPage = () => {
   const [error, setError] = useState(null);
 
   const COLORS = ["#2e7d32", "#1976d2", "#ed6c02", "#d32f2f", "#9c27b0"];
+
+  const categories = [
+    "Country",
+    "Solar Energy",
+    "Wind Energy",
+    "Hydro Energy",
+    "Get Predictions",
+  ];
+
+  const handleCategoryClick = (category) => {
+    switch (category) {
+      case "Country":
+        navigate("/energy-by-country-year");
+        break;
+      case "Solar Energy":
+        navigate("/solar-energy");
+        break;
+      case "Wind Energy":
+        navigate("/wind-energy");
+        break;
+      case "Hydro Energy":
+        navigate("/hydro-energy");
+        break;
+      case "Get Predictions":
+        navigate("/get-predictions");
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     const path = location.pathname;
@@ -224,98 +256,119 @@ const EnergyPage = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Card>
-        <CardContent>
-          <Typography variant="h4" gutterBottom>
-            {energyType.charAt(0).toUpperCase() + energyType.slice(1)} Energy
-            Analysis
-          </Typography>
+    <>
+      {/* Header Section */}
+      <div className="header">
+        <h1 className="title">Green Vester</h1>
+        <p className="subtitle">Invest in a Greener World</p>
+      </div>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
+      {/* Navbar */}
+      <div className="navbar">
+        {categories.map((category, index) => (
+          <div
+            key={index}
+            className="nav-item"
+            onClick={() => handleCategoryClick(category)}
+            style={{ cursor: "pointer" }}
+          >
+            <p>{category}</p>
+          </div>
+        ))}
+      </div>
+      <Box sx={{ padding: 3 }}>
+        <Card>
+          <CardContent>
+            <Typography variant="h4" gutterBottom>
+              {energyType.charAt(0).toUpperCase() + energyType.slice(1)} Energy
+              Analysis
+            </Typography>
 
-          {loading ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight={400}
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <>
-              <Grid container spacing={3}>
-                {chartData.map((data, index) => (
-                  <Grid item xs={12} md={6} key={index}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 50 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.2 }}
-                    >
-                      <Card>
-                        <CardContent>
-                          <Typography variant="h6" gutterBottom>
-                            {
-                              [
-                                "Global Trend",
-                                "Regional Distribution",
-                                "Efficiency Metrics",
-                                "Cost Analysis",
-                                "Environmental Impact",
-                              ][index]
-                            }
-                          </Typography>
-                          {renderChart(data, index)}
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </Grid>
-                ))}
-              </Grid>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
 
-              {prediction && (
-                <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1 }}
-                >
-                  <Card sx={{ mt: 3 }}>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                        Predictions and Forecasts
-                      </Typography>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} md={4}>
-                          <Typography variant="body1">
-                            Predicted Value (Next Year):{" "}
-                            {prediction.nextYearValue} MW
-                          </Typography>
+            {loading ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight={400}
+              >
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  {chartData.map((data, index) => (
+                    <Grid item xs={12} md={6} key={index}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.2 }}
+                      >
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                              {
+                                [
+                                  "Global Trend",
+                                  "Regional Distribution",
+                                  "Efficiency Metrics",
+                                  "Cost Analysis",
+                                  "Environmental Impact",
+                                ][index]
+                              }
+                            </Typography>
+                            {renderChart(data, index)}
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {prediction && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1 }}
+                  >
+                    <Card sx={{ mt: 3 }}>
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                          Predictions and Forecasts
+                        </Typography>
+                        <Grid container spacing={3}>
+                          <Grid item xs={12} md={4}>
+                            <Typography variant="body1">
+                              Predicted Value (Next Year):{" "}
+                              {prediction.nextYearValue} MW
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <Typography variant="body1">
+                              Expected Growth Rate: {prediction.growthRate}%
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <Typography variant="body1">
+                              Confidence Level: {prediction.confidence}%
+                            </Typography>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                          <Typography variant="body1">
-                            Expected Growth Rate: {prediction.growthRate}%
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                          <Typography variant="body1">
-                            Confidence Level: {prediction.confidence}%
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </Box>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+    </>
   );
 };
 

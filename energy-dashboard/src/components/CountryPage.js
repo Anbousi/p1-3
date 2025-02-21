@@ -44,7 +44,34 @@ const CountryPage = () => {
     "#9c27b0",
     "#ffeb3b",
   ];
+  const categories = [
+    "Country",
+    "Solar Energy",
+    "Wind Energy",
+    "Hydro Energy",
+    "Get Predictions",
+  ];
 
+  const handleCategoryClick = (category) => {
+    switch (category) {
+      case "Country":
+        navigate("/energy-by-country-year");
+        break;
+      case "Solar Energy":
+        navigate("/solar-energy");
+        break;
+      case "Wind Energy":
+        navigate("/wind-energy");
+        break;
+      case "Hydro Energy":
+        navigate("/hydro-energy");
+        break;
+      case "Get Predictions":
+        navigate("/get-predictions");
+      default:
+        break;
+    }
+  };
   useEffect(() => {
     if (!location.state?.country) {
       navigate("/");
@@ -247,53 +274,74 @@ const CountryPage = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Card>
-        <CardContent>
-          <Typography variant="h4" gutterBottom>
-            Energy Data Analysis for {countryName}
-          </Typography>
+    <>
+      {/* Header Section */}
+      <div className="header">
+        <h1 className="title">Green Vester</h1>
+        <p className="subtitle">Invest in a Greener World</p>
+      </div>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
+      {/* Navbar */}
+      <div className="navbar">
+        {categories.map((category, index) => (
+          <div
+            key={index}
+            className="nav-item"
+            onClick={() => handleCategoryClick(category)}
+            style={{ cursor: "pointer" }}
+          >
+            <p>{category}</p>
+          </div>
+        ))}
+      </div>
+      <Box sx={{ padding: 3 }}>
+        <Card>
+          <CardContent>
+            <Typography variant="h4" gutterBottom>
+              Energy Data Analysis for {countryName}
+            </Typography>
 
-          {loading ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              minHeight={400}
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Grid container spacing={3}>
-              {chartData.map((chartConfig, index) => (
-                <Grid item xs={12} md={6} key={index}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.2 }}
-                  >
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                          {chartConfig.title}
-                        </Typography>
-                        {renderChart(chartConfig, index)}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </CardContent>
-      </Card>
-    </Box>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            {loading ? (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight={400}
+              >
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Grid container spacing={3}>
+                {chartData.map((chartConfig, index) => (
+                  <Grid item xs={12} md={6} key={index}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.2 }}
+                    >
+                      <Card>
+                        <CardContent>
+                          <Typography variant="h6" gutterBottom>
+                            {chartConfig.title}
+                          </Typography>
+                          {renderChart(chartConfig, index)}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+    </>
   );
 };
 

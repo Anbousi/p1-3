@@ -17,7 +17,13 @@ import {
 import "./map.css";
 
 const placeholderImage = "https://via.placeholder.com/50";
-const categories = ["Country", "Solar Energy", "Wind Energy", "Hydro Energy"];
+const categories = [
+  "Country",
+  "Solar Energy",
+  "Wind Energy",
+  "Hydro Energy",
+  "Get Predictions",
+];
 
 const redIcon = new L.Icon({
   iconUrl: "./image.png",
@@ -32,7 +38,7 @@ const MapComponent = () => {
   const [graphsData, setGraphsData] = useState([]); // State to store graph data
   const [prediction, setPrediction] = useState(null); // State to store prediction data
   const [topRenewableCountries, setTopRenewableCountries] = useState(null); // State to store top renewable countries data
-  const [renewableEnergyData, setRenewableEnergyData] = useState([]); // State to store renewable energy data
+  const [topCountriesFossil, setTopCountriesFossil] = useState([]); // State to store renewable energy data
 
   // Helper function to fetch data
   const fetchData = async (url, options = {}) => {
@@ -166,9 +172,15 @@ const MapComponent = () => {
       setChartData(formattedData);
 
       // Fetch top renewable countries data
-      const topCountriesData = await fetchData();
-      // "http://localhost:5000/get_top_renewable_countries_by_year?year=2023"
+      const topCountriesData = await fetchData(
+        "http://localhost:5000/get_top_renewable_countries_by_year?year=2023"
+      );
       setTopRenewableCountries(topCountriesData);
+      const topCountriesDataFossil = await fetchData(
+        "http://localhost:5000/get_top_fossil_countries_by_year?year=2023"
+      );
+      setTopCountriesFossil(topCountriesDataFossil);
+      console.log(topCountriesDataFossil);
     };
 
     fetchAllData();
@@ -188,6 +200,8 @@ const MapComponent = () => {
       case "Hydro Energy":
         navigate("/hydro-energy");
         break;
+      case "Get Predictions":
+        navigate("/get-predictions");
       default:
         break;
     }
@@ -301,8 +315,6 @@ const MapComponent = () => {
       xAxisKey: item.xAxisKey,
       yAxisKey: item.yAxisKey,
     }))[0];
-
-  console.log("heere", renewableData);
 
   return (
     <div className="container">
@@ -510,6 +522,70 @@ const MapComponent = () => {
           </p>
         </div>
       </div>
+
+      {topRenewableCountries && (
+        <div className="table-container">
+          {/* Renewable Energy Table */}
+          <h2 className="table-title green-title">
+            🌍 Top 5 Countries by Renewable Energy Type
+          </h2>
+          <table className="styled-table green-table">
+            <thead>
+              <tr>
+                {Object.keys(topRenewableCountries).map((key, index) => (
+                  <th key={index}>{key.replace(/_/g, " ")}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({
+                length: Math.max(
+                  ...Object.values(topRenewableCountries).map(
+                    (arr) => arr.length
+                  )
+                ),
+              }).map((_, rowIndex) => (
+                <tr key={rowIndex}>
+                  {Object.values(topRenewableCountries).map(
+                    (countries, colIndex) => (
+                      <td key={colIndex}>{countries[rowIndex] || ""}</td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Fossil Energy Table */}
+          <h2 className="table-title red-title">
+            🔥 Top 5 Countries by Fossil Energy Type
+          </h2>
+          <table className="styled-table red-table">
+            <thead>
+              <tr>
+                {Object.keys(topCountriesFossil).map((key, index) => (
+                  <th key={index}>{key.replace(/_/g, " ")}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({
+                length: Math.max(
+                  ...Object.values(topCountriesFossil).map((arr) => arr.length)
+                ),
+              }).map((_, rowIndex) => (
+                <tr key={rowIndex}>
+                  {Object.values(topCountriesFossil).map(
+                    (countries, colIndex) => (
+                      <td key={colIndex}>{countries[rowIndex] || ""}</td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Contact Section */}
       <div className="contact-section">
